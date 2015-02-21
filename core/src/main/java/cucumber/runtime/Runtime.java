@@ -10,6 +10,7 @@ import gherkin.I18n;
 import gherkin.formatter.Argument;
 import gherkin.formatter.Formatter;
 import gherkin.formatter.Reporter;
+<<<<<<< ad54ef1bc2ca0c0018a61c66ee88e38bbd4083c9
 import gherkin.formatter.model.Comment;
 import gherkin.formatter.model.DataTableRow;
 import gherkin.formatter.model.DocString;
@@ -19,6 +20,9 @@ import gherkin.formatter.model.Scenario;
 import gherkin.formatter.model.Step;
 import gherkin.formatter.model.Tag;
 import gherkin.formatter.model.Feature;
+=======
+import gherkin.formatter.model.*;
+>>>>>>> Add @BeforeStep and @AfterStep annotations.
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -205,6 +209,14 @@ public class Runtime implements UnreportedStepExecutor {
         runHooks(glue.getAfterHooks(), reporter, tags, false);
     }
 
+    public void runBeforeStepHooks(Reporter reporter, Step step) {
+        runStepHooks(step, glue.getBeforeStepHooks(), reporter, true);
+    }
+
+    public void runAfterStepHooks(Reporter reporter, Step step) {
+        runStepHooks(step, glue.getAfterStepHooks(), reporter, false);
+    }
+
     private void runHooks(List<HookDefinition> hooks, Reporter reporter, Set<Tag> tags, boolean isBefore) {
         if (!runtimeOptions.isDryRun()) {
             for (HookDefinition hook : hooks) {
@@ -235,6 +247,38 @@ public class Runtime implements UnreportedStepExecutor {
                 } else {
                     reporter.after(match, result);
                 }
+            }
+        }
+    }
+
+    private void runStepHooks(Step step, List<StepHookDefinition> hooks, Reporter reporter, boolean isBefore) {
+        if (!runtimeOptions.isDryRun()) {
+            for (StepHookDefinition hook : hooks) {
+                runStepHook(step, hook, reporter, isBefore);
+            }
+        }
+    }
+
+    private void runStepHook(Step step, StepHookDefinition hook, Reporter reporter, boolean isBefore) {
+        String status = Result.PASSED;
+        Throwable error = null;
+        Match match = new Match(Collections.<Argument>emptyList(), hook.getLocation(false));
+        stopWatch.start();
+        try {
+            hook.execute(step);
+        } catch (Throwable t) {
+            error = t;
+            status = isPending(t) ? "pending" : Result.FAILED;
+            addError(t);
+            skipNextStep = true;
+        } finally {
+            long duration = stopWatch.stop();
+            Result result = new Result(status, duration, error, DUMMY_ARG);
+            addHookToCounterAndResult(result);
+            if (isBefore) {
+                reporter.before(match, result);
+            } else {
+                reporter.after(match, result);
             }
         }
     }
