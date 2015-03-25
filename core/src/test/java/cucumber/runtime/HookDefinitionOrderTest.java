@@ -21,7 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class HookOrderTest {
+public class HookDefinitionOrderTest {
 
     private Runtime runtime;
     private Glue glue;
@@ -40,7 +40,7 @@ public class HookOrderTest {
     public void before_hooks_execute_in_order() throws Throwable {
         List<HookDefinition> hooks = mockHooks(3, Integer.MAX_VALUE, 1);
         for (HookDefinition hook : hooks) {
-            glue.addBeforeHook(hook);
+            glue.addBeforeHook(hook, HookScope.SCENARIO);
         }
 
         runtime.runBeforeHooks(mock(Reporter.class), new HashSet<Tag>());
@@ -55,7 +55,7 @@ public class HookOrderTest {
     public void after_hooks_execute_in_reverse_order() throws Throwable {
         List<HookDefinition> hooks = mockHooks(2, Integer.MAX_VALUE, 4);
         for (HookDefinition hook : hooks) {
-            glue.addAfterHook(hook);
+            glue.addAfterHook(hook, HookScope.SCENARIO);
         }
 
         runtime.runAfterHooks(mock(Reporter.class), new HashSet<Tag>());
@@ -70,11 +70,11 @@ public class HookOrderTest {
     public void hooks_order_across_many_backends() throws Throwable {
         List<HookDefinition> backend1Hooks = mockHooks(3, Integer.MAX_VALUE, 1);
         for (HookDefinition hook : backend1Hooks) {
-            glue.addBeforeHook(hook);
+            glue.addBeforeHook(hook, HookScope.SCENARIO);
         }
         List<HookDefinition> backend2Hooks = mockHooks(2, Integer.MAX_VALUE, 4);
         for (HookDefinition hook : backend2Hooks) {
-            glue.addBeforeHook(hook);
+            glue.addBeforeHook(hook, HookScope.SCENARIO);
         }
 
         runtime.runBeforeHooks(mock(Reporter.class), new HashSet<Tag>());
