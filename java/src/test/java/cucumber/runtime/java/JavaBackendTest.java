@@ -1,16 +1,8 @@
 package cucumber.runtime.java;
 
 import cucumber.api.StepDefinitionReporter;
-<<<<<<< ad54ef1bc2ca0c0018a61c66ee88e38bbd4083c9
 import cucumber.api.java.ObjectFactory;
-import cucumber.runtime.CucumberException;
-import cucumber.runtime.Glue;
-import cucumber.runtime.HookDefinition;
-import cucumber.runtime.StepDefinition;
-import cucumber.runtime.StepDefinitionMatch;
-=======
 import cucumber.runtime.*;
->>>>>>> Add @BeforeStep and @AfterStep annotations.
 import cucumber.runtime.java.stepdefs.Stepdefs;
 import gherkin.I18n;
 import gherkin.formatter.model.Step;
