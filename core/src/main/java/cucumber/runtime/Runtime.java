@@ -284,7 +284,7 @@ public class Runtime implements UnreportedStepExecutor {
             reporter.match(e.getMatches().get(0));
             Result result = new Result(Result.FAILED, 0L, e, DUMMY_ARG);
             reporter.result(result);
-            addStepToCounterAndResult(result);
+            addStepToCounterAndResult(reporter, step, result);
             addError(e);
             skipNextStep = true;
             return;
@@ -295,7 +295,7 @@ public class Runtime implements UnreportedStepExecutor {
         } else {
             reporter.match(Match.UNDEFINED);
             reporter.result(Result.UNDEFINED);
-            addStepToCounterAndResult(Result.UNDEFINED);
+            addStepToCounterAndResult(reporter, step, Result.UNDEFINED);
             skipNextStep = true;
             return;
         }
@@ -305,7 +305,7 @@ public class Runtime implements UnreportedStepExecutor {
         }
 
         if (skipNextStep) {
-            addStepToCounterAndResult(Result.SKIPPED);
+            addStepToCounterAndResult(reporter, step, Result.SKIPPED);
             reporter.result(Result.SKIPPED);
         } else {
             String status = Result.PASSED;
@@ -321,7 +321,7 @@ public class Runtime implements UnreportedStepExecutor {
             } finally {
                 long duration = stopWatch.stop();
                 Result result = new Result(status, duration, error, DUMMY_ARG);
-                addStepToCounterAndResult(result);
+                addStepToCounterAndResult(reporter, step, result);
                 reporter.result(result);
             }
         }
@@ -334,7 +334,8 @@ public class Runtime implements UnreportedStepExecutor {
         return t.getClass().isAnnotationPresent(Pending.class) || Arrays.binarySearch(PENDING_EXCEPTIONS, t.getClass().getName()) >= 0;
     }
 
-    private void addStepToCounterAndResult(Result result) {
+    private void addStepToCounterAndResult(Reporter reporter, Step step, Result result) {
+        runAfterStepHooks(reporter, step);
         scenarioResult.add(result);
         stats.addStep(result);
     }
